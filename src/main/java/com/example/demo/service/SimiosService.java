@@ -1,9 +1,65 @@
 package com.example.demo.service;
 
+import com.example.demo.model.Simios;
+import com.example.demo.repository.SimiosRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SimiosService {
+
+    @Autowired
+    SimiosRepository simiosRepository;
+
+    public HashMap getAll() {
+        List<Simios> params = simiosRepository.findAll();
+        Integer total = params.size();
+        List<Simios> result = params.stream()
+                .filter(name -> name.isStatus())
+                .collect(Collectors.toList());
+        Integer mutant = result.size();
+        Integer human = total-mutant;
+        HashMap jsonMessage= new HashMap();
+        jsonMessage.put("count_mutant_dna", mutant);
+        jsonMessage.put("count_human_dna",human);
+        jsonMessage.put("ratio",mutant/human);
+        return jsonMessage;
+    }
+
+   @Async
+    public boolean check(String[] dna){
+       Simios simios = new Simios();
+       StringBuilder sb = new StringBuilder();
+       for (String str : dna) {
+           sb.append(str);
+       }
+       String dnaString = sb.toString();
+       Simios mateus = simiosRepository.findByDna(dnaString);
+            if ( validateSize(dna) && validateCharacters(dna) ) {
+                if ((findLettersHorizontal(dna) || findLettersVertical(dna)) ||
+                        (findLettersDiagonallyLeft(dna) || findLettersDiagonallyRight(dna))){
+                    if(mateus == null) {
+                        simios.setDna(dnaString);
+                        simios.setStatus(true);
+                        simiosRepository.save(simios);
+                        return true;
+                    }
+                    return true;
+                }
+                if(mateus == null){
+                    simios.setDna(dnaString);
+                    simios.setStatus(false);
+                    simiosRepository.save(simios);
+                    return false;
+                }
+            }
+        return false;
+    }
 
     public boolean isSimian(String dna) {
         int iCharCnt = 0;

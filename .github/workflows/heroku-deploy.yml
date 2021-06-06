@@ -14,8 +14,8 @@ jobs:
       - uses: akhileshns/heroku-deploy@v3.8.9
         with:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-          heroku_email: "mateusjoaquim@live.com"
           heroku_app_name: "mateus-case-meli-back-end"
+          heroku_email: "mateusjoaquim@live.com"
           buildpack: "https://github.com/mateusbrazza/case-meli.git"
           db_url: ${{secrets.DB_URL}}
           db_username: ${{secrets.DATABASE_USERNAME}}

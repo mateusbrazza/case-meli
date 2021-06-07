@@ -19,16 +19,16 @@ public class SimiosService {
         this.simiosRepository = simiosRepository;
     }
 
-    public HashMap getStatusDNA() {
+    public HashMap<String, Double> getStatusDNA() {
         List<Simios> params = simiosRepository.findAll();
-        Integer total = params.size();
+        int total = params.size();
         List<Simios> result = params.stream()
-                .filter(name -> name.isStatus())
+                .filter(Simios::isStatus)
                 .collect(Collectors.toList());
-        Integer mutant = result.size();
-        Integer human = total-mutant;
+        double mutant = result.size();
+        double human = total-mutant;
         if(mutant >= 1 && human >=1){
-            HashMap jsonMessage= new HashMap();
+            HashMap<String, Double> jsonMessage= new HashMap<>();
             jsonMessage.put("count_mutant_dna", mutant);
             jsonMessage.put("count_human_dna",human);
             jsonMessage.put("ratio",mutant/human);
@@ -113,11 +113,11 @@ public class SimiosService {
 
     public boolean findLettersHorizontal(String[] dna) {
         for (String value : dna) {
-            String  characters = "";
+            StringBuilder characters = new StringBuilder();
             for (int i = 0; i < value.length(); i ++) {
-                characters += value.charAt(i);
+                characters.append(value.charAt(i));
             }
-            if (checkLetters(characters)){
+            if (checkLetters(characters.toString())){
                 return true;
             }
         }
@@ -127,9 +127,9 @@ public class SimiosService {
 
     public boolean findLettersVertical(String[] dna) {
         for (int i = 0; i < 6; i ++) {
-            String characters = "";
-            for (String value : dna) characters += value.charAt(i);
-            if (checkLetters(characters)) {
+            StringBuilder characters = new StringBuilder();
+            for (String value : dna) characters.append(value.charAt(i));
+            if (checkLetters(characters.toString())) {
                 return true;
             }
         }
@@ -137,14 +137,14 @@ public class SimiosService {
     }
     
     public boolean findLettersDiagonallyLeft(String[] dna) {
-        String  characters = "";
+        StringBuilder characters = new StringBuilder();
         int     i = 0;
         for (String value : dna) {
-            characters += value.charAt(i);
+            characters.append(value.charAt(i));
             i ++;
         }
         for (i = 0; i < 6; i ++) {
-            if (checkLetters(characters)) {
+            if (checkLetters(characters.toString())) {
                 return true;
             }
         }
@@ -152,15 +152,12 @@ public class SimiosService {
     }
     
     public boolean findLettersDiagonallyRight(String[] dna) {
-        String  characters = "";
+        StringBuilder characters = new StringBuilder();
         int     i = 5;
         for (String value : dna) {
-            characters += value.charAt(i);
+            characters.append(value.charAt(i));
             i --;
         }
-        if (checkLetters(characters)){
-            return true;
-        }
-        return false;
+        return checkLetters(characters.toString());
     }
 }

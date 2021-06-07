@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
+import com.example.demo.dto.DnaDTO;
 import com.example.demo.service.SimiosService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -42,12 +43,13 @@ public class SimiosControllerTest {
     @Test
     public void testVerifySimianOK() throws Exception {
         when(this.simiosService.isSimian((String[]) any())).thenReturn(true);
-        MockHttpServletRequestBuilder contentTypeResult = MockMvcRequestBuilders.post("/simian")
-                .contentType(MediaType.APPLICATION_JSON);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        MockHttpServletRequestBuilder requestBuilder = contentTypeResult
-                .content(objectMapper.writeValueAsString(new String[]{new String()}));
+        DnaDTO dnaDTO = new DnaDTO();
+        dnaDTO.setDna(new String[]{"CTGGAA", "CTGAGC", "TATTGT", "AGAGGG", "CCCCTA", "TCACTG"});
+        String content = (new ObjectMapper()).writeValueAsString(dnaDTO);
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/simian")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content);
         MockMvcBuilders.standaloneSetup(this.simiosController)
                 .build()
                 .perform(requestBuilder)
@@ -57,18 +59,18 @@ public class SimiosControllerTest {
     @Test
     public void testVerifySimianForbidden() throws Exception {
         when(this.simiosService.isSimian((String[]) any())).thenReturn(false);
-        MockHttpServletRequestBuilder contentTypeResult = MockMvcRequestBuilders.post("/simian")
-                .contentType(MediaType.APPLICATION_JSON);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        MockHttpServletRequestBuilder requestBuilder = contentTypeResult
-                .content(objectMapper.writeValueAsString(new String[]{new String()}));
+        DnaDTO dnaDTO = new DnaDTO();
+        dnaDTO.setDna(new String[]{"Dna"});
+        String content = (new ObjectMapper()).writeValueAsString(dnaDTO);
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/simian")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(content);
         ResultActions actualPerformResult = MockMvcBuilders.standaloneSetup(this.simiosController)
                 .build()
                 .perform(requestBuilder);
         actualPerformResult.andExpect(MockMvcResultMatchers.status().isForbidden());
     }
-
 
 
 

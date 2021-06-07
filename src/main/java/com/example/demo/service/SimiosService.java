@@ -2,7 +2,6 @@ package com.example.demo.service;
 
 import com.example.demo.model.Simios;
 import com.example.demo.repository.SimiosRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +12,14 @@ import java.util.stream.Collectors;
 @Service
 public class SimiosService {
 
-    @Autowired
+    final
     SimiosRepository simiosRepository;
 
-    public HashMap getAll() {
+    public SimiosService(SimiosRepository simiosRepository) {
+        this.simiosRepository = simiosRepository;
+    }
+
+    public HashMap getStatusDNA() {
         List<Simios> params = simiosRepository.findAll();
         Integer total = params.size();
         List<Simios> result = params.stream()
@@ -24,26 +27,30 @@ public class SimiosService {
                 .collect(Collectors.toList());
         Integer mutant = result.size();
         Integer human = total-mutant;
-        HashMap jsonMessage= new HashMap();
-        jsonMessage.put("count_mutant_dna", mutant);
-        jsonMessage.put("count_human_dna",human);
-        jsonMessage.put("ratio",mutant/human);
-        return jsonMessage;
+        if(mutant >= 1 && human >=1){
+            HashMap jsonMessage= new HashMap();
+            jsonMessage.put("count_mutant_dna", mutant);
+            jsonMessage.put("count_human_dna",human);
+            jsonMessage.put("ratio",mutant/human);
+            return jsonMessage;
+        }
+        return null;
+
     }
 
    @Async
-    public boolean check(String[] dna){
+    public boolean isSimian(String[] dna){
        Simios simios = new Simios();
        StringBuilder sb = new StringBuilder();
        for (String str : dna) {
            sb.append(str);
        }
        String dnaString = sb.toString();
-       Simios mateus = simiosRepository.findByDna(dnaString);
+       Simios simian = simiosRepository.findByDna(dnaString);
             if ( validateSize(dna) && validateCharacters(dna) ) {
                 if ((findLettersHorizontal(dna) || findLettersVertical(dna)) ||
                         (findLettersDiagonallyLeft(dna) || findLettersDiagonallyRight(dna))){
-                    if(mateus == null) {
+                    if(simian == null) {
                         simios.setDna(dnaString);
                         simios.setStatus(true);
                         simiosRepository.save(simios);
@@ -51,7 +58,7 @@ public class SimiosService {
                     }
                     return true;
                 }
-                if(mateus == null){
+                if(simian == null){
                     simios.setDna(dnaString);
                     simios.setStatus(false);
                     simiosRepository.save(simios);
@@ -61,7 +68,7 @@ public class SimiosService {
         return false;
     }
 
-    public boolean isSimian(String dna) {
+    public boolean checkLetters(String dna) {
         int iCharCnt = 0;
         for(int i = 0; i < dna.length(); ++i) {
             char chCompare = dna.charAt(i);
@@ -110,7 +117,7 @@ public class SimiosService {
             for (int i = 0; i < value.length(); i ++) {
                 characters += value.charAt(i);
             }
-            if (isSimian(characters)){
+            if (checkLetters(characters)){
                 return true;
             }
         }
@@ -122,7 +129,7 @@ public class SimiosService {
         for (int i = 0; i < 6; i ++) {
             String characters = "";
             for (String value : dna) characters += value.charAt(i);
-            if (isSimian(characters)) {
+            if (checkLetters(characters)) {
                 return true;
             }
         }
@@ -137,7 +144,7 @@ public class SimiosService {
             i ++;
         }
         for (i = 0; i < 6; i ++) {
-            if (isSimian(characters)) {
+            if (checkLetters(characters)) {
                 return true;
             }
         }
@@ -151,7 +158,7 @@ public class SimiosService {
             characters += value.charAt(i);
             i --;
         }
-        if (isSimian(characters)){
+        if (checkLetters(characters)){
             return true;
         }
         return false;

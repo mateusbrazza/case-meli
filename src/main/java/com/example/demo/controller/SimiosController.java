@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.DnaDTO;
 import com.example.demo.service.SimiosService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,18 +17,18 @@ public class SimiosController {
     @Autowired
     SimiosService simiosService;
 
-    @PostMapping
+    @PostMapping("/simian")
     @ApiOperation(value = "check if it's a siminon")
-    public ResponseEntity update(@RequestBody String[] var)  {
-        if ( simiosService.check(var) ) {
+    public ResponseEntity verifySimian(@RequestBody DnaDTO dna)  {
+        if ( simiosService.isSimian(dna.getDna()) ) {
                 return new ResponseEntity<>(HttpStatus.OK);
         }
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
 
     }
-    @GetMapping
-    @ApiOperation(value = "")
-    public ResponseEntity getAll() {
-        return new ResponseEntity<>(simiosService.getAll(), HttpStatus.OK);
+    @GetMapping("/stats")
+    @ApiOperation(value = "check the status of the DNA")
+    public ResponseEntity statusdna() {
+        return new ResponseEntity<>(simiosService.getStatusDNA(), HttpStatus.OK);
     }
 }
